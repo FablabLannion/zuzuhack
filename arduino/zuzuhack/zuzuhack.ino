@@ -38,9 +38,12 @@ const unsigned int STOP = 0xFFFF;
 
 
 
-//internal led for debuyg purpose
+//internal led for debug purpose
 int led = 13; 
  
+//motor pinouts
+int motorA = 8; 
+int motorB = 7; 
  
 
 
@@ -60,6 +63,15 @@ void setup() {
 
     
     pinMode(led, OUTPUT);
+    pinMode(motorA, OUTPUT);
+    pinMode(motorB, OUTPUT);
+    
+    //Stop the zuzupet by default
+    digitalWrite(motorA, LOW);
+    digitalWrite(motorB, LOW);
+    
+    
+    
    
 
 	
@@ -111,20 +123,104 @@ void loop_() {
 	
 	
 }
-void loop() {
+
+void loop_test_motors() {
   
-  /*
-    digitalWrite(led, HIGH); 
+ //Stoppe pendant 1 seconde
+ digitalWrite(motorA, LOW);
+ digitalWrite(motorB, LOW);
+ delay(2000);
+   
+  //Avance pendant 1 seconde
+ digitalWrite(motorA, HIGH); 
+ digitalWrite(motorB, LOW); 
+ delay(1000);
+ 
+ //Stoppe pendant 1 seconde
+ digitalWrite(motorA, LOW);
+ digitalWrite(motorB, LOW);
+ delay(2000);
+ 
+ 
+ //Recule pendant 2 seconde
+ digitalWrite(motorA, LOW);
+ digitalWrite(motorB,HIGH);
+ delay(2000); 
+ 
+ //Stoppe pendant 1 seconde
+ digitalWrite(motorA, LOW);
+ digitalWrite(motorB, LOW);
+ delay(2000);
+ 
+  //Freine pendant 1 seconde
+ digitalWrite(motorA, HIGH);
+ digitalWrite(motorB, HIGH);
+ delay(2000);
+  
+
+  
+}
+
+
+
+void loop() {
+
+digitalWrite(led, HIGH); 
     delay(100);
     digitalWrite(led, LOW);
     delay(100);
     Serial.println("bip.."); 	
-	*/
+	
 	
 	  int id ;
 	  //Check for incomming tc
 	  // s ledNumber, brightness \n
-	  // for example: "p1\n":
+	  // for example: 
+          // "p1\n":play song #1
+          // "m0\n":go ahead (2) , reverse (1) , stop (0)
+	  if (bluetooth.find("m")) {
+		id = bluetooth.parseInt(); // parses numeric characters before the comma
+		// print the results back to the sender:
+		//open serial line for debug purpose
+		if (serial==true)
+		{		
+			Serial.print("Update Motor: " );
+			Serial.print(id);
+		}
+		if (id==0)
+		{
+
+                 //Stop
+                 digitalWrite(motorA, LOW);
+                 digitalWrite(motorB, LOW);
+
+		}
+		if (id==1)
+		{
+                  //Stop
+                 digitalWrite(motorA, LOW);
+                 digitalWrite(motorB, LOW);
+                 delay(500);
+                 
+                  //Go backward
+                 digitalWrite(motorA, LOW);
+                 digitalWrite(motorB,HIGH);
+
+		}
+		if (id==2)
+		{
+  
+                    //Stop
+                   digitalWrite(motorA, LOW);
+                   digitalWrite(motorB, LOW);
+                   delay(500);  
+
+                   //Go forward
+                   digitalWrite(motorA, HIGH); 
+                   digitalWrite(motorB, LOW);   
+		}
+          }
+          
 	  if (bluetooth.find("p")) {
 		id = bluetooth.parseInt(); // parses numeric characters before the comma
 		// print the results back to the sender:
@@ -134,97 +230,10 @@ void loop() {
 			Serial.print("Playing song: " );
 			Serial.print(id);
 		}
-		if (id==0)
-		{
-		 
-		  sendCommand(0x0000);
-		  //delay(10000);
-		}
-		if (id==1)
-		{
-		 sendCommand(0x0001); 
-		 //delay(10000);
-		}	
-		if (id==2)
-		{
-		  
-		  sendCommand(0x0002);
-		  //delay(10000);
-		}
-		if (id==3)
-		{
-		 sendCommand(0x0003); 
-		 //delay(10000);
-		}
-		if (id==4)
-		{
-		  
-		  sendCommand(0x0004);
-		  //delay(10000);
-		}
-		if (id==5)
-		{
-		 
-		 sendCommand(0x0005); 
-		 //delay(10000);
-		}	
-		if (id==6)
-		{
-		 
-		 sendCommand(0x0006); 
-		 //delay(10000);
-		}	
-
-		if (id==7)
-		{
-		 
-		 sendCommand(0x0007); 
-		 //delay(10000);
-		}
-
-		if (id==8)
-		{
-		 
-		 sendCommand(0x0007); 
-		 //delay(10000);
-		}	
-		
-
-
-
-		
+                sendCommand(id);		
 	  }
-  
-	//Check for incomming tc
-	/*
-   if (Genotronex.available()){
-		BluetoothData=Genotronex.read();
-		Serial.println("data receveid:"+BluetoothData); 	
-		/*
-	    if(BluetoothData=='1'){   // if number 1 pressed ....
-		   digitalWrite(led, HIGH);
-		   Genotronex.println("LED  On D13 ON ! ");
-		  // play "0001.ad4"
-		  sendCommand(0x0001);  	   
-	    }
-		
-	    if (BluetoothData=='0'){// if number 0 pressed ....
-		   digitalWrite(led, LOW);
-		   Genotronex.println("LED  On D13 OFF ! ");
-		  // play "0000.ad4"
-		  sendCommand(0x0000);   
-	    }
-   }		
-		*/
 
 
-  
- 
-   
-
-  // stop playing
-  //sendCommand(STOP);
-  //delay(2000);
 }
 
 //Function for audio module
