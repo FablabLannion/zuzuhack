@@ -35,6 +35,16 @@
 		sendToArduino("p",id);
 		Toast.shortshow("Play Song"+id);
 	}
+	
+	function motor(id){
+	    //force connection if needed
+		connect();
+		
+		console.log("Move out!"+id);
+		sendToArduino("m",id);
+		Toast.shortshow("Bouge de là! "+id);
+	}	
+	
 
 	function connect(e){
 		console.log("connect to zuzpet...");
