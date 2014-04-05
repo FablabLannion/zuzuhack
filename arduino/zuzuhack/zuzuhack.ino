@@ -18,6 +18,7 @@
  
  
  #include <SoftwareSerial.h>// import the serial library
+ #include <Adafruit_NeoPixel.h> // Use to control the noose
  
 //arduino pinout for audio module
 int RST = A3;
@@ -56,6 +57,20 @@ boolean serial=false;
 
 
 
+// Parameter 1 = number of pixels in led
+// Parameter 2 = pin number (most are valid)
+// Parameter 3 = pixel type flags, add together as needed:
+//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
+//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
+//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
+//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
+#define LED_PIN            5      /* Physical Pin 6: LED connection                 */
+Adafruit_NeoPixel   led_noose           = Adafruit_NeoPixel(1, LED_PIN, NEO_GRB + NEO_KHZ800);
+volatile unsigned char count      = 0; 
+volatile unsigned char play_noose      = 1; 
+
+
+
 
 
 void setup() {  
@@ -71,8 +86,9 @@ void setup() {
     digitalWrite(motorB, LOW);
     
     
-    
-   
+    //Neopixel controller for the noose
+    led_noose.begin();
+	led_noose.show(); // Initialize all pixels to 'off'
 
 	
 	//Audio module init
@@ -161,15 +177,51 @@ void loop_test_motors() {
   
 }
 
+void loop_test_noose() {
+	 delay(30);
+	if (play_noose==1)
+	{
+    led_noose.setPixelColor(0, Wheel(count++));
+    led_noose.show();
+	}
+	 delay(30);
+}	
 
 
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel(byte WheelPos) {
+  if(WheelPos < 84) {
+    return led_noose.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  } else if(WheelPos >=84 && WheelPos < 88) { // fix blue color
+    return led_noose.Color(0, 0, 255);  
+  } else if(WheelPos < 170) {
+    WheelPos -= 85;
+    return led_noose.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  } else {
+    WheelPos -= 170;
+    return led_noose.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  }
+}
+
+
+	
+	
 void loop() {
 
-digitalWrite(led, HIGH); 
-    delay(100);
-    digitalWrite(led, LOW);
-    delay(100);
-    Serial.println("bip.."); 	
+	digitalWrite(led, HIGH); 
+    delay(20);
+	if (play_noose==1)
+	{
+    led_noose.setPixelColor(0, Wheel(count++));
+    led_noose.show();
+	}	
+    delay(20);
+	digitalWrite(led, HIGH); 
+	if (serial==true)
+	{		
+		Serial.println("bip.."); 
+	}			
 	
 	
 	  int id ;
@@ -232,7 +284,33 @@ digitalWrite(led, HIGH);
 		}
                 sendCommand(id);		
 	  }
-
+	  
+	  if (bluetooth.find("n")) {
+		id = bluetooth.parseInt(); // parses numeric characters before the comma
+		// print the results back to the sender:
+		//open serial line for debug purpose
+		if (id==0)
+		{
+			//switch off noose
+			play_noose=0;
+			led_noose.setPixelColor(0, led_noose.Color(0, 0, 0));
+			led_noose.show();			
+		
+		}
+		if (id==1)
+		{
+			//enable wheel color	
+			play_noose=1;	
+		}
+		if (id==2)
+		{
+			//disable wheel color
+			play_noose=0;			
+		}		
+		
+	  }
+	  
+	  
 
 }
 

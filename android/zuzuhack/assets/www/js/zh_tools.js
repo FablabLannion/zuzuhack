@@ -14,6 +14,8 @@
 	//macAddress from the zuzuhack bluetooth chipset
 	//TODO: set it from a settings menu
 	var macAddress = "98:D3:31:10:06:60";
+	//var macAddress_JJ = "00:14:01:06:14:63";
+	//var macAddress_cb = "98:D3:31:10:06:60";
 	//var macAddress = "00:06:66:4D:AA:AA";
 	
 	
@@ -45,7 +47,17 @@
 		Toast.shortshow("Bouge de là! "+id);
 	}	
 	
-
+	function nooze(id){
+	    //force connection if needed
+		connect();
+		
+		console.log("Change Noose status:"+id);
+		sendToArduino("n",id);
+		Toast.shortshow("Nez"+id);
+	}	
+	
+	
+	
 	function connect(e){
 		console.log("connect to zuzpet...");
 		//Toast.shortshow("Plugin called successfully :-)");
